@@ -95,5 +95,6 @@ if __name__ == '__main__':
         os.makedirs('templates')
     
     print("Starting Flask server...")
-    # Use host='0.0.0.0' if you want to access it from your phone on the same network
-    app.run(host='0.0.0.0', debug=True)
+    
+    app.run(debug=True)                   # Use this line for local testing
+    #app.run(host='0.0.0.0', debug=True)   # Use this line to run on a public IP if needed
