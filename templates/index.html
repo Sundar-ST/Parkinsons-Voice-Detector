@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-
 <html>
 <head>
 <title>Parkinson's Voice Detector MVP</title>
-<!-- Use a professional, clean font -->
-<link href="https://www.google.com/search?q=https://fonts.googleapis.com/css2%3Ffamily%3DInter:wght%40400%3B600%3B700%26display%3Dswap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
+    /* ===================================================================
+    I. LIGHT THEME (Default) VARIABLES 
+    ===================================================================
+    */
     :root {
         --color-primary: #007bff;
         --color-success: #28a745;
@@ -14,31 +16,74 @@
         --color-danger-light: #fd7e14; /* High Risk */
         --color-danger-critical: #dc3545; /* Critical Risk */
         --color-text-dark: #343a40;
-        --color-bg-light: #f4f4f9;
+        --color-text-light: #ffffff; /* New: for dark mode text */
+        --color-bg-main: #f4f4f9; /* Body background */
+        --color-bg-card: #ffffff; /* Container background */
+        --color-border: #dee2e6;
+        --color-shadow: rgba(0, 0, 0, 0.1);
+        --color-status-text: #6c757d;
     }
-    
+
+    /* ===================================================================
+    II. DARK THEME VARIABLES 
+    ===================================================================
+    */
+    body.dark-mode {
+        --color-text-dark: var(--color-text-light);
+        --color-bg-main: #121212; /* Darker body background */
+        --color-bg-card: #1e1e1e; /* Dark container background */
+        --color-border: #333333;
+        --color-shadow: rgba(255, 255, 255, 0.08);
+        --color-status-text: #b0b0b0;
+    }
+
+    /* ===================================================================
+    III. GLOBAL & BASE STYLES 
+    ===================================================================
+    */
     body {
         font-family: 'Inter', sans-serif;
         text-align: center;
         margin: 0;
         padding: 50px 20px;
-        background-color: var(--color-bg-light);
+        background-color: var(--color-bg-main);
         color: var(--color-text-dark);
         display: flex;
         justify-content: center;
         align-items: center;
         min-height: 100vh;
+        transition: background-color 0.3s, color 0.3s; /* Smooth theme transition */
     }
-    
+
     .container {
-        background-color: #ffffff;
+        background-color: var(--color-bg-card);
         padding: 40px;
         border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 30px var(--color-shadow);
         width: 100%;
         max-width: 450px;
+        position: relative; /* For theme toggle button positioning */
+        transition: background-color 0.3s, box-shadow 0.3s;
     }
     
+    /* THEME TOGGLE BUTTON STYLES */
+    #theme-toggle {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 1.5em;
+        cursor: pointer;
+        color: var(--color-text-dark); /* Color changes with theme */
+        padding: 5px;
+        transition: color 0.3s;
+    }
+
+    #theme-toggle:hover {
+        opacity: 0.8;
+    }
+
     h1 {
         font-size: 1.8em;
         font-weight: 700;
@@ -53,7 +98,7 @@
         margin-right: 10px;
     }
 
-    button {
+    button:not(#theme-toggle) { /* Apply to main button only */
         padding: 15px 30px;
         font-size: 1.1em;
         background-color: var(--color-primary);
@@ -66,7 +111,7 @@
         font-weight: 600;
     }
     
-    button:hover:enabled {
+    button:hover:enabled:not(#theme-toggle) {
         background-color: #0056b3;
         transform: translateY(-1px);
     }
@@ -80,14 +125,15 @@
     #status {
         margin-top: 20px;
         font-style: italic;
-        color: #6c757d;
+        color: var(--color-status-text);
     }
 
     #result {
         margin-top: 30px;
         padding-top: 25px;
-        border-top: 1px solid #dee2e6;
+        border-top: 1px solid var(--color-border);
         text-align: left;
+        transition: border-color 0.3s;
     }
     
     #result h2 {
@@ -110,19 +156,21 @@
     .Moderate_Risk { color: var(--color-warning); font-weight: 700; }
     .High_Risk { color: var(--color-danger-light); font-weight: 700; }
     .Critical_Risk { color: var(--color-danger-critical); font-weight: 700; }
-    .Error { color: var(--color-text-dark); font-weight: 700; }
-    .None { color: #555; }
-    .initial { color: #555; }
+    .Error { color: var(--color-danger-critical); font-weight: 700; }
+    .None { color: var(--color-status-text); }
+    .initial { color: var(--color-status-text); }
 </style>
-
-
 </head>
 <body>
 <div class="container">
-<h1>
-<span class="icon">🎙️</span> AI Parkinson's Voice Risk Predictor
-</h1>
-<p>Your task is to submit a 5-second sustained vowel sound (e.g., 'Aaaaaah').</p>
+    <button id="theme-toggle" aria-label="Toggle dark/light theme">
+        <span id="theme-icon">🌙</span>
+    </button>
+
+    <h1>
+        <span class="icon">🎙️</span> AI Parkinson's Voice Risk Predictor
+    </h1>
+    <p>Your task is to submit a 5-second sustained vowel sound (e.g., 'Aaaaaah').</p>
 
     <button id="recordBtn" onclick="runPrediction()">Start Recording & Predict</button>
     <div id="status">Ready.</div>
@@ -136,47 +184,87 @@
 
 
 <script>
-function runPrediction() {
-document.getElementById('status').innerText = "Recording in progress... Please check your terminal to ensure mic access.";
-document.getElementById('recordBtn').disabled = true;
-document.getElementById('status_text').innerText = '...Analyzing...';
-document.getElementById('status_text').className = 'initial';
-document.getElementById('score_text').innerText = '--';
+// ===================================================================
+// Theme Toggle Functionality
+// ===================================================================
 
-// Send POST request to the Flask backend to trigger recording and prediction
-fetch('/predict', { method: 'POST' })
-.then(response => response.json())
-.then(data => {
-    document.getElementById('recordBtn').disabled = false;
-    document.getElementById('status').innerText = "Prediction complete.";
+const themeToggle = document.getElementById('theme-toggle');
+const themeIcon = document.getElementById('theme-icon');
+
+function toggleTheme() {
+    const isDarkMode = document.body.classList.toggle('dark-mode');
     
-    const statusElement = document.getElementById('status_text');
+    // Save preference to local storage
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     
-    if (data.error) {
-        // Handles pipeline crash/error (set by app.py)
-        statusElement.innerText = data.status || data.error; 
-        statusElement.className = 'Error';
-        document.getElementById('score_text').innerText = '--';
-        return;
+    // Update the icon
+    themeIcon.innerText = isDarkMode ? '☀️' : '🌙';
+}
+
+// Check for saved preference on page load
+function loadTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        themeIcon.innerText = '☀️';
+    } else {
+        // Default to light mode (or explicitly set if 'light' was saved)
+        document.body.classList.remove('dark-mode');
+        themeIcon.innerText = '🌙';
     }
-    
-    statusElement.innerText = data.status;
-    document.getElementById('score_text').innerText = data.score;
+}
 
-    // Read the risk_category string from the backend (e.g., "Critical Risk")
-    // replace spaces with underscores, and apply as the CSS class (e.g., "Critical_Risk")
-    const categoryClass = data.risk_category.replace(/\s/g, '_'); 
-    statusElement.className = categoryClass; 
-})
-.catch(error => {
-    document.getElementById('recordBtn').disabled = false;
-    document.getElementById('status').innerText = "An error occurred. Check console for details.";
-    document.getElementById('status_text').innerText = 'Connection Error';
-    document.getElementById('status_text').className = 'Error';
-    console.error('Fetch error:', error);
-});
+// Attach the toggle function to the button
+themeToggle.addEventListener('click', toggleTheme);
+
+// Load the theme when the script runs
+loadTheme();
 
 
+// ===================================================================
+// Prediction Functionality (Original, modified slightly for clarity)
+// ===================================================================
+
+function runPrediction() {
+    document.getElementById('status').innerText = "Recording in progress... Please speak now.";
+    document.getElementById('recordBtn').disabled = true;
+    document.getElementById('status_text').innerText = '...Analyzing...';
+    document.getElementById('status_text').className = 'initial';
+    document.getElementById('score_text').innerText = '--';
+
+    // Send POST request to the Flask backend to trigger recording and prediction
+    fetch('/predict', { method: 'POST' })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('recordBtn').disabled = false;
+        document.getElementById('status').innerText = "Prediction complete.";
+        
+        const statusElement = document.getElementById('status_text');
+        
+        if (data.error) {
+            // Handles pipeline crash/error (set by app.py)
+            statusElement.innerText = data.status || data.error; 
+            statusElement.className = 'Error';
+            document.getElementById('score_text').innerText = '--';
+            return;
+        }
+        
+        statusElement.innerText = data.status;
+        document.getElementById('score_text').innerText = data.score;
+
+        // Read the risk_category string from the backend (e.g., "Critical Risk")
+        // replace spaces with underscores, and apply as the CSS class (e.g., "Critical_Risk")
+        const categoryClass = data.risk_category.replace(/\s/g, '_'); 
+        statusElement.className = categoryClass; 
+    })
+    .catch(error => {
+        document.getElementById('recordBtn').disabled = false;
+        document.getElementById('status').innerText = "An error occurred. Check console for details.";
+        document.getElementById('status_text').innerText = 'Connection Error';
+        document.getElementById('status_text').className = 'Error';
+        console.error('Fetch error:', error);
+    });
 }
 </script>
 
