@@ -13,8 +13,8 @@
         --color-primary: #007bff;
         --color-success: #28a745;
         --color-warning: #ffc107;
-        --color-danger-light: #fd7e14; /* High Risk */
-        --color-danger-critical: #dc3545; /* Critical Risk / Error */
+        --color-danger-light: #fd7e14;
+        --color-danger-critical: #dc3545;
         --color-text-dark: #343a40;
         --color-text-light: #ffffff;
         --color-bg-main: #f4f4f9;
@@ -22,6 +22,7 @@
         --color-border: #dee2e6;
         --color-shadow: rgba(0, 0, 0, 0.1);
         --color-status-text: #6c757d;
+        --color-bg-card-rgb: 255, 255, 255;
     }
 
     /* ===================================================================
@@ -35,6 +36,7 @@
         --color-border: #333333;
         --color-shadow: rgba(255, 255, 255, 0.08);
         --color-status-text: #b0b0b0;
+        --color-bg-card-rgb: 30, 30, 30;
     }
 
     /* ===================================================================
@@ -167,9 +169,55 @@
         font-size: 0.95em;
         line-height: 1.4;
     }
+    
+    /* --- NEW STYLES FOR LOADING SPINNER --- */
+    #loading-overlay {
+        position: absolute; 
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(var(--color-bg-card-rgb), 0.75); 
+        backdrop-filter: blur(2px);
+        display: flex;
+        /* NEW: Stack items vertically */
+        flex-direction: column; 
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+        border-radius: 12px;
+        transition: opacity 0.3s;
+        /* NEW: Space between text and spinner */
+        gap: 15px; 
+    }
 
-    /* --- FINAL RISK CATEGORIES STYLES --- */
-    /* Note: These classes are also used for #precaution_advice color */
+    #loading-text {
+        font-size: 1.2em;
+        font-weight: 600;
+        color: var(--color-text-dark); 
+        z-index: 12; 
+    }
+    /* Ensure text contrasts in dark mode */
+    body.dark-mode #loading-text {
+        color: var(--color-text-light);
+    }
+
+    .spinner {
+        border: 4px solid var(--color-border);
+        border-top: 4px solid var(--color-primary);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        z-index: 11; 
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* --- FINAL RISK CATEGORIES STYLES (No change) --- */
     .Low_Risk { color: var(--color-success); font-weight: 700; }
     .Moderate_Risk { color: var(--color-warning); font-weight: 700; }
     .High_Risk { color: var(--color-danger-light); font-weight: 700; }
@@ -181,6 +229,12 @@
 </head>
 <body onload="loadTheme(); loadLanguage();">
 <div class="container">
+    
+    <div id="loading-overlay" style="display: none;">
+        <span id="loading-text" data-key="status_listening">Listening...</span>
+        <div class="spinner"></div>
+    </div>
+    
     <select id="language-selector" onchange="setLanguage(this.value)">
         <option value="en" selected>English</option>
         <option value="hi">हिन्दी (Hindi)</option>
@@ -224,7 +278,7 @@
 
 <script>
 // ===================================================================
-// I. LANGUAGE TRANSLATION DATA
+// I. LANGUAGE TRANSLATION DATA (UPDATED with status_listening)
 // ===================================================================
 
 const translations = {
@@ -242,6 +296,9 @@ const translations = {
         'status_complete': "Prediction complete.",
         'status_analyzing': "...Analyzing...",
         'error_connection': "Connection Error",
+        
+        // --- NEW KEY ADDED ---
+        'status_listening': "Listening...", 
         
         // --- ADVICE KEYS ---
         'advice_header': "Precaution & Next Steps:",
@@ -272,9 +329,12 @@ const translations = {
         'summary_score': "जोखिम स्कोर (पीडी की संभावना)",
         'awaiting_prediction': "भविष्यवाणी की प्रतीक्षा...",
         'status_recording': "रिकॉर्डिंग जारी है... कृपया अब बोलें।",
-        'status_complete': "भविष्यवाणी पूरी हुई।",
+        'status_complete': "भविष्यवाणी पूरी हुई。",
         'status_analyzing': "...विश्लेषण हो रहा है。",
         'error_connection': "कनेक्शन त्रुटि",
+        
+        // --- NEW KEY ADDED ---
+        'status_listening': "सुन रहा है...",
         
         // --- ADVICE KEYS ---
         'advice_header': "सावधानियाँ और अगले कदम:",
@@ -309,6 +369,9 @@ const translations = {
         'status_analyzing': "...பகுப்பாய்வு நடக்கிறது。",
         'error_connection': "இணைப்புப் பிழை",
         
+        // --- NEW KEY ADDED ---
+        'status_listening': "கேட்கிறது...",
+        
         // --- ADVICE KEYS ---
         'advice_header': "முன்னெச்சரிக்கை மற்றும் அடுத்த படிகள்:",
         'advice_initial': "வழிகாட்டுதலைப் பார்க்க ஒரு கணிப்பை இயக்கவும்。",
@@ -341,6 +404,9 @@ const translations = {
         'status_complete': "అంచనా పూర్తయింది。",
         'status_analyzing': "...విశ్లేషణ జరుగుతోంది。",
         'error_connection': "కనెక్షన్ లోపం",
+        
+        // --- NEW KEY ADDED ---
+        'status_listening': "వింటుంది...",
         
         // --- ADVICE KEYS ---
         'advice_header': "జాగ్రత్త మరియు తదుపరి చర్యలు:",
@@ -375,6 +441,9 @@ const translations = {
         'status_analyzing': "...বিশ্লেষণ করা হচ্ছে。",
         'error_connection': "সংযোগ ত্রুটি",
         
+        // --- NEW KEY ADDED ---
+        'status_listening': "শুনছি...",
+        
         // --- ADVICE KEYS ---
         'advice_header': "সতর্কতা ও পরবর্তী পদক্ষেপ:",
         'advice_initial': "নির্দেশিকা দেখতে একটি পূর্বাভাস চালান।",
@@ -383,7 +452,7 @@ const translations = {
         'advice_High_Risk': "এই পরীক্ষাটি **উচ্চ ঝুঁকি: পরামর্শমূলক** নির্দেশ করে। যদি আপনার প্রথম-ডিগ্রী আত্মীয়ের পিডি থাকে বা গন্ধের অনুভূতি হ্রাস (অ্যানোসমিয়া) বা আরইএম ঘুমের ব্যাধি (আরবিডি) এর মতো লক্ষণ থাকে, তবে ব্যক্তিগতকৃত ঝুঁকি মূল্যায়নের জন্য একজন নিউরোলজিস্টের সাথে পরামর্শ করুন। পরিচিত পরিবেশগত বিষাক্ত পদার্থগুলির দীর্ঘস্থায়ী এক্সপোজার কঠোরভাবে এড়িয়ে চলুন।",
         'advice_Critical_Risk': "এই পরীক্ষাটি **সংকটজনক ঝুঁকি: ক্লিনিকাল ব্যবস্থাপনা** নির্দেশ করে। যদি পারকিনসন্সের রোগ নির্ণয় হয়, তবে আপনার নির্ধারিত ওষুধের নিয়মাবলী কঠোরভাবে মেনে চলুন এবং লক্ষণগুলি খারাপ হলে অবিলম্বে আপনার ডাক্তারকে জানান। গতিশীলতা, ভারসাম্য এবং জীবনযাত্রার মান বজায় রাখতে নিয়মিত, বিশেষ শারীরিক ও বৃত্তিমূলক থেরাপিতে নিযুক্ত হন।",
         'advice_Error': "পূর্বাভাস ব্যর্থ হয়েছে। আপনার মাইক্রোফোন এবং ইন্টারনেট সংযোগ পরীক্ষা করুন, তারপর আবার চেষ্টা করুন। ফলাফলগুলি কখনওই চিকিৎসার পরামর্শ হিসাবে ব্যবহার করা উচিত নয়।",
-
+        
         // --- DISCLAIMER KEY ---
         'disclaimer_text': "দাবিত্যাগ: এই সরঞ্জামটি শুধুমাত্র প্রাথমিক ঝুঁকি মূল্যায়নের জন্য। এটি কোনো চিকিৎসা রোগ নির্ণয় নয়। যেকোনো স্বাস্থ্য সংক্রান্ত উদ্বেগের জন্য বা চিকিৎসা সংক্রান্ত সিদ্ধান্ত নেওয়ার আগে সর্বদা একজন যোগ্য চিকিৎসক বা বিশেষজ্ঞের সাথে পরামর্শ করুন।",
 
@@ -398,6 +467,8 @@ const translations = {
 
 let currentLanguage = 'en';
 
+const loadingOverlay = document.getElementById('loading-overlay'); 
+
 
 // ===================================================================
 // II. LANGUAGE SWITCHING LOGIC 
@@ -406,7 +477,6 @@ let currentLanguage = 'en';
 function updateContent() {
     const langData = translations[currentLanguage];
     
-    // 1. Update all elements with a 'data-key' attribute
     document.querySelectorAll('[data-key]').forEach(element => {
         const key = element.getAttribute('data-key');
         if (langData && langData[key]) {
@@ -414,7 +484,6 @@ function updateContent() {
         }
     });
 
-    // 2. Handle specific dynamic status text
     const statusElement = document.getElementById('status');
     const recordBtn = document.getElementById('recordBtn');
 
@@ -488,8 +557,13 @@ themeToggle.addEventListener('click', toggleTheme);
 function runPrediction() {
     const langData = translations[currentLanguage];
     
-    document.getElementById('status').innerText = langData['status_recording'];
+    // 1. START LOADING STATE
+    loadingOverlay.style.display = 'flex'; // SHOW THE SPINNER/OVERLAY
     document.getElementById('recordBtn').disabled = true;
+    
+    // Note: The status text remains 'Recording in progress... Please speak now.' 
+    // This is hidden behind the overlay, but still set for consistency.
+    document.getElementById('status').innerText = langData['status_recording']; 
     
     const statusTextElement = document.getElementById('status_text');
     const adviceElement = document.getElementById('precaution_advice');
@@ -498,7 +572,6 @@ function runPrediction() {
     statusTextElement.className = 'initial';
     document.getElementById('score_text').innerText = '--';
     
-    // Set initial advice to analyzing state
     adviceElement.innerHTML = langData['advice_initial'];
     adviceElement.className = 'None';
 
@@ -506,7 +579,10 @@ function runPrediction() {
     fetch('/predict', { method: 'POST' })
     .then(response => response.json())
     .then(data => {
+        // 2. END LOADING STATE (SUCCESS)
+        loadingOverlay.style.display = 'none'; // HIDE THE SPINNER/OVERLAY
         document.getElementById('recordBtn').disabled = false;
+        
         document.getElementById('status').innerText = langData['status_complete'];
         
         if (data.error) {
@@ -515,31 +591,30 @@ function runPrediction() {
             statusTextElement.className = 'Error';
             document.getElementById('score_text').innerText = '--';
             
-            // Set error advice
             adviceElement.innerHTML = langData['advice_Error'] || 'An error occurred.';
             adviceElement.className = 'Error';
             return;
         }
         
         // Successful Prediction
-        const riskCategory = data.risk_category.replace(/\s/g, '_'); // e.g., Low_Risk
-        const categoryKey = 'risk_' + riskCategory; // e.g., risk_Low_Risk
-        const adviceKey = 'advice_' + riskCategory; // e.g., advice_Low_Risk
+        const riskCategory = data.risk_category.replace(/\s/g, '_');
+        const categoryKey = 'risk_' + riskCategory;
+        const adviceKey = 'advice_' + riskCategory;
         
-        // Set Status Text (translated)
         const translatedStatus = langData[categoryKey] || data.status;
         statusTextElement.innerText = translatedStatus;
         statusTextElement.className = riskCategory; 
 
-        // Set Risk Score
         document.getElementById('score_text').innerText = data.score;
         
-        // Set Advice/Precaution (using innerHTML to support **bolding**)
         adviceElement.innerHTML = langData[adviceKey] || langData['advice_Error'];
         adviceElement.className = riskCategory;
     })
     .catch(error => {
+        // 3. END LOADING STATE (CATCH/ERROR)
+        loadingOverlay.style.display = 'none'; // HIDE THE SPINNER/OVERLAY
         document.getElementById('recordBtn').disabled = false;
+        
         document.getElementById('status').innerText = langData['error_connection'] + ". Check console for details.";
         document.getElementById('status_text').innerText = langData['error_connection'];
         document.getElementById('status_text').className = 'Error';
