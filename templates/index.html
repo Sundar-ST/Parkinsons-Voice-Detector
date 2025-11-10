@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>Parkinson's Voice Detector MVP</title>
+<!-- Use a professional, clean font -->
+<link href="https://www.google.com/search?q=https://fonts.googleapis.com/css2%3Ffamily%3DInter:wght%40400%3B600%3B700%26display%3Dswap" rel="stylesheet">
+
+<style>
+    :root {
+        --color-primary: #007bff;
+        --color-success: #28a745;
+        --color-warning: #ffc107;
+        --color-danger-light: #fd7e14; /* High Risk */
+        --color-danger-critical: #dc3545; /* Critical Risk */
+        --color-text-dark: #343a40;
+        --color-bg-light: #f4f4f9;
+    }
+    
+    body {
+        font-family: 'Inter', sans-serif;
+        text-align: center;
+        margin: 0;
+        padding: 50px 20px;
+        background-color: var(--color-bg-light);
+        color: var(--color-text-dark);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+    
+    .container {
+        background-color: #ffffff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 450px;
+    }
+    
+    h1 {
+        font-size: 1.8em;
+        font-weight: 700;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    h1 .icon {
+        font-size: 1.2em;
+        margin-right: 10px;
+    }
+
+    button {
+        padding: 15px 30px;
+        font-size: 1.1em;
+        background-color: var(--color-primary);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.1s;
+        margin-top: 15px;
+        font-weight: 600;
+    }
+    
+    button:hover:enabled {
+        background-color: #0056b3;
+        transform: translateY(-1px);
+    }
+    
+    button:disabled {
+        background-color: #adb5bd;
+        cursor: not-allowed;
+        opacity: 0.8;
+    }
+    
+    #status {
+        margin-top: 20px;
+        font-style: italic;
+        color: #6c757d;
+    }
+
+    #result {
+        margin-top: 30px;
+        padding-top: 25px;
+        border-top: 1px solid #dee2e6;
+        text-align: left;
+    }
+    
+    #result h2 {
+        font-size: 1.4em;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    #result p {
+        margin: 5px 0;
+    }
+
+    #score_text {
+        font-weight: 700;
+        font-size: 1.1em;
+    }
+
+    /* --- FINAL RISK CATEGORIES STYLES --- */
+    .Low_Risk { color: var(--color-success); font-weight: 700; }
+    .Moderate_Risk { color: var(--color-warning); font-weight: 700; }
+    .High_Risk { color: var(--color-danger-light); font-weight: 700; }
+    .Critical_Risk { color: var(--color-danger-critical); font-weight: 700; }
+    .Error { color: var(--color-text-dark); font-weight: 700; }
+    .None { color: #555; }
+    .initial { color: #555; }
+</style>
+
+
+</head>
+<body>
+<div class="container">
+<h1>
+<span class="icon">🎙️</span> AI Parkinson's Voice Risk Predictor
+</h1>
+<p>Your task is to submit a 5-second sustained vowel sound (e.g., 'Aaaaaah').</p>
+
+    <button id="recordBtn" onclick="runPrediction()">Start Recording & Predict</button>
+    <div id="status">Ready.</div>
+    
+    <div id="result">
+        <h2>Prediction Summary:</h2>
+        <p>Status: <span id="status_text" class="initial">Awaiting prediction...</span></p>
+        <p>Risk Score (Probability of PD): <span id="score_text">--</span></p>
+    </div>
+</div>
+
+
+<script>
+function runPrediction() {
+document.getElementById('status').innerText = "Recording in progress... Please check your terminal to ensure mic access.";
+document.getElementById('recordBtn').disabled = true;
+document.getElementById('status_text').innerText = '...Analyzing...';
+document.getElementById('status_text').className = 'initial';
+document.getElementById('score_text').innerText = '--';
+
+// Send POST request to the Flask backend to trigger recording and prediction
+fetch('/predict', { method: 'POST' })
+.then(response => response.json())
+.then(data => {
+    document.getElementById('recordBtn').disabled = false;
+    document.getElementById('status').innerText = "Prediction complete.";
+    
+    const statusElement = document.getElementById('status_text');
+    
+    if (data.error) {
+        // Handles pipeline crash/error (set by app.py)
+        statusElement.innerText = data.status || data.error; 
+        statusElement.className = 'Error';
+        document.getElementById('score_text').innerText = '--';
+        return;
+    }
+    
+    statusElement.innerText = data.status;
+    document.getElementById('score_text').innerText = data.score;
+
+    // Read the risk_category string from the backend (e.g., "Critical Risk")
+    // replace spaces with underscores, and apply as the CSS class (e.g., "Critical_Risk")
+    const categoryClass = data.risk_category.replace(/\s/g, '_'); 
+    statusElement.className = categoryClass; 
+})
+.catch(error => {
+    document.getElementById('recordBtn').disabled = false;
+    document.getElementById('status').innerText = "An error occurred. Check console for details.";
+    document.getElementById('status_text').innerText = 'Connection Error';
+    document.getElementById('status_text').className = 'Error';
+    console.error('Fetch error:', error);
+});
+
+
+}
+</script>
+
+</body>
+</html>
