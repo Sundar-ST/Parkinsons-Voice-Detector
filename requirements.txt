@@ -1,0 +1,13 @@
+numpy
+scikit-learn
+soundfile
+
+Flask
+joblib
+librosa
+numpy
+pandas
+parselmouth
+scikit-learn
+scipy
+sounddevice
