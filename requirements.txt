@@ -11,3 +11,5 @@ parselmouth
 scikit-learn
 scipy
 sounddevice
+
+gunicorn
