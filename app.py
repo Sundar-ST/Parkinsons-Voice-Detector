@@ -96,5 +96,5 @@ if __name__ == '__main__':
     
     print("Starting Flask server...")
     
-    app.run(debug=True)                   # Use this line for local testing
-    #app.run(host='0.0.0.0', debug=True)   # Use this line to run on a public IP if needed
+    #app.run(debug=True)                   # Use this line for local testing
+    app.run(host='0.0.0.0', debug=True)   # Use this line to run on a public IP if needed

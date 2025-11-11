@@ -1,289 +1,312 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Parkinson's Voice Detector MVP</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Parkinson's Voice Detector MVP — Full Screen</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-<style>
-    /* ===================================================================
-    I. LIGHT THEME (Default) VARIABLES 
-    ===================================================================
-    */
+  <style>
+    /* =========================================================
+       I. THEME VARIABLES
+    ========================================================= */
     :root {
-        --color-primary: #007bff;
-        --color-success: #28a745;
-        --color-warning: #ffc107;
-        --color-danger-light: #fd7e14;
-        --color-danger-critical: #dc3545;
-        --color-text-dark: #343a40;
-        --color-text-light: #ffffff;
-        --color-bg-main: #f4f4f9;
-        --color-bg-card: #ffffff;
-        --color-border: #dee2e6;
-        --color-shadow: rgba(0, 0, 0, 0.1);
-        --color-status-text: #6c757d;
-        --color-bg-card-rgb: 255, 255, 255;
+      --color-primary: #007bff;
+      --color-success: #28a745;
+      --color-warning: #ffc107;
+      --color-danger-light: #fd7e14;
+      --color-danger-critical: #dc3545;
+      --color-text-dark: #1f2937; /* slightly darker for readability */
+      --color-text-light: #ffffff;
+      --color-bg-main: #f4f4f9;
+      --color-bg-card: #ffffff;
+      --color-border: #e5e7eb;
+      --color-shadow: rgba(0, 0, 0, 0.08);
+      --color-status-text: #6b7280;
+      --radius: 14px;
+      --container-max: 900px;
+      --color-bg-card-rgb: 255, 255, 255;
     }
-
-    /* ===================================================================
-    II. DARK THEME VARIABLES 
-    ===================================================================
-    */
     body.dark-mode {
-        --color-text-dark: var(--color-text-light);
-        --color-bg-main: #121212;
-        --color-bg-card: #1e1e1e;
-        --color-border: #333333;
-        --color-shadow: rgba(255, 255, 255, 0.08);
-        --color-status-text: #b0b0b0;
-        --color-bg-card-rgb: 30, 30, 30;
+      --color-text-dark: var(--color-text-light);
+      --color-bg-main: #0b0b0c;
+      --color-bg-card: #141416;
+      --color-border: #2a2a2e;
+      --color-shadow: rgba(255, 255, 255, 0.06);
+      --color-status-text: #a3a3a3;
+      --color-bg-card-rgb: 20, 20, 22;
     }
 
-    /* ===================================================================
-    III. GLOBAL & BASE STYLES 
-    ===================================================================
-    */
+    /* =========================================================
+       II. LAYOUT (FULL SCREEN)
+    ========================================================= */
+    html, body {
+      height: 100%;
+    }
     body {
-        font-family: 'Inter', sans-serif;
-        text-align: center;
-        margin: 0;
-        padding: 50px 20px;
-        background-color: var(--color-bg-main);
-        color: var(--color-text-dark);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        transition: background-color 0.3s, color 0.3s;
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--color-bg-main);
+      color: var(--color-text-dark);
+      transition: background-color .3s, color .3s;
+    }
+    .app {
+      min-height: 100svh; /* mobile safe viewport height */
+      display: grid;
+      grid-template-rows: auto 1fr auto;
     }
 
+    /* Top bar */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px clamp(12px, 3vw, 28px);
+      border-bottom: 1px solid var(--color-border);
+      background: color-mix(in oklab, var(--color-bg-card) 70%, transparent);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: saturate(1.2) blur(6px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+    .brand .icon {
+      font-size: 1.2em;
+    }
+
+    /* Main content area centered */
+    .content-wrap {
+      display: grid;
+      place-items: center;
+      padding: clamp(16px, 4vw, 40px);
+    }
     .container {
-        background-color: var(--color-bg-card);
-        padding: 40px;
-        border-radius: 12px;
-        box-shadow: 0 10px 30px var(--color-shadow);
-        width: 100%;
-        max-width: 450px;
-        position: relative;
-        transition: background-color 0.3s, box-shadow 0.3s;
-    }
-    
-    /* THEME TOGGLE BUTTON STYLES */
-    #theme-toggle {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background: none;
-        border: none;
-        font-size: 1.5em;
-        cursor: pointer;
-        color: var(--color-text-dark);
-        padding: 5px;
-        transition: color 0.3s;
+      width: min(100%, var(--container-max));
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      box-shadow: 0 20px 40px var(--color-shadow);
+      padding: clamp(20px, 4vw, 36px);
     }
 
-    /* LANGUAGE SELECTOR STYLES */
-    #language-selector {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        padding: 5px 10px;
-        border-radius: 6px;
-        border: 1px solid var(--color-border);
-        background-color: var(--color-bg-card);
-        color: var(--color-text-dark);
-        font-family: 'Inter', sans-serif;
-        cursor: pointer;
-        transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-    }
-    
+    /* Typography */
     h1 {
-        font-size: 1.8em;
-        font-weight: 700;
-        margin-top: 30px;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+      font-size: clamp(1.4rem, 2.8vw, 2rem);
+      font-weight: 800;
+      margin: 0 0 8px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-align: center;
     }
-    
-    h1 .icon {
-        font-size: 1.2em;
-        margin-right: 10px;
+    p.lead {
+      margin: 0 0 18px 0;
+      text-align: center;
+      font-size: clamp(.95rem, 1.9vw, 1.05rem);
+      color: var(--color-status-text);
     }
 
-    button:not(#theme-toggle) {
-        padding: 15px 30px;
-        font-size: 1.1em;
-        background-color: var(--color-primary);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background-color 0.3s, transform 0.1s;
-        margin-top: 15px;
-        font-weight: 600;
+    /* Controls */
+    #theme-toggle {
+      background: none;
+      border: 1px solid var(--color-border);
+      border-radius: 999px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--color-text-dark);
+      transition: transform .06s ease;
     }
-    
-    button:hover:enabled:not(#theme-toggle) {
-        background-color: #0056b3;
-        transform: translateY(-1px);
+    #theme-toggle:active { transform: translateY(1px); }
+
+    #language-selector {
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--color-border);
+      background: var(--color-bg-card);
+      color: var(--color-text-dark);
+      font-family: inherit;
+      cursor: pointer;
     }
-    
-    button:disabled {
-        background-color: #adb5bd;
-        cursor: not-allowed;
-        opacity: 0.8;
+
+    button.primary {
+      padding: 14px 24px;
+      font-size: 1.05rem;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform .06s ease, filter .2s ease, opacity .2s ease;
+      width: 100%;
+      margin-top: 10px;
     }
-    
+    button.primary:hover:enabled { filter: brightness(0.95); transform: translateY(-1px); }
+    button.primary:disabled { opacity: .7; cursor: not-allowed; }
+
+    /* Status + Result */
     #status {
-        margin-top: 20px;
-        font-style: italic;
-        color: var(--color-status-text);
+      margin-top: 12px;
+      text-align: center;
+      font-style: italic;
+      color: var(--color-status-text);
     }
-
     #result {
-        margin-top: 30px;
-        padding-top: 25px;
-        border-top: 1px solid var(--color-border);
-        text-align: left;
-        transition: border-color 0.3s;
+      margin-top: 22px;
+      padding-top: 22px;
+      border-top: 1px solid var(--color-border);
     }
-    
     #result h2 {
-        font-size: 1.4em;
-        font-weight: 600;
-        margin-bottom: 15px;
+      font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+      margin: 0 0 10px 0;
     }
+    #result p { margin: 6px 0; }
+    #score_text { font-weight: 800; }
 
-    #result p {
-        margin: 5px 0;
-    }
-
-    #score_text {
-        font-weight: 700;
-        font-size: 1.1em;
-    }
-
-    #precaution_advice {
-        font-size: 0.95em;
-        line-height: 1.4;
-    }
-    
-    /* --- NEW STYLES FOR LOADING SPINNER --- */
+    /* Overlay (FULL SCREEN) */
     #loading-overlay {
-        position: absolute; 
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(var(--color-bg-card-rgb), 0.75); 
-        backdrop-filter: blur(2px);
-        display: flex;
-        /* NEW: Stack items vertically */
-        flex-direction: column; 
-        justify-content: center;
-        align-items: center;
-        z-index: 10;
-        border-radius: 12px;
-        transition: opacity 0.3s;
-        /* NEW: Space between text and spinner */
-        gap: 15px; 
+      position: fixed; /* full screen */
+      inset: 0;
+      width: 100vw;
+      height: 100svh;
+      background-color: rgba(var(--color-bg-card-rgb), 0.75);
+      backdrop-filter: blur(2px);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      z-index: 999;
     }
-
     #loading-text {
-        font-size: 1.2em;
-        font-weight: 600;
-        color: var(--color-text-dark); 
-        z-index: 12; 
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--color-text-dark);
     }
-    /* Ensure text contrasts in dark mode */
-    body.dark-mode #loading-text {
-        color: var(--color-text-light);
-    }
+    body.dark-mode #loading-text { color: var(--color-text-light); }
 
     .spinner {
-        border: 4px solid var(--color-border);
-        border-top: 4px solid var(--color-primary);
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        animation: spin 1s linear infinite;
-        z-index: 11; 
+      border: 4px solid var(--color-border);
+      border-top: 4px solid var(--color-primary);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Risk classes */
+    .Low_Risk { color: var(--color-success); font-weight: 800; }
+    .Moderate_Risk { color: var(--color-warning); font-weight: 800; }
+    .High_Risk { color: var(--color-danger-light); font-weight: 800; }
+    .Critical_Risk { color: var(--color-danger-critical); font-weight: 800; }
+    .Error { color: var(--color-danger-critical); font-weight: 800; }
+    .None, .initial { color: var(--color-status-text); }
+
+    /* Footer (optional info/disclaimer zone) */
+    footer {
+      padding: 10px clamp(12px, 3vw, 28px) 20px;
+      color: var(--color-status-text);
+      text-align: center;
     }
 
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+    /* Reduce motion preference */
+    @media (prefers-reduced-motion: reduce) {
+      .spinner { animation: none; }
+      * { transition: none !important; }
     }
-
-    /* --- FINAL RISK CATEGORIES STYLES (No change) --- */
-    .Low_Risk { color: var(--color-success); font-weight: 700; }
-    .Moderate_Risk { color: var(--color-warning); font-weight: 700; }
-    .High_Risk { color: var(--color-danger-light); font-weight: 700; }
-    .Critical_Risk { color: var(--color-danger-critical); font-weight: 700; }
-    .Error { color: var(--color-danger-critical); font-weight: 700; }
-    .None { color: var(--color-status-text); }
-    .initial { color: var(--color-status-text); }
-</style>
+  </style>
 </head>
+
 <body onload="loadTheme(); loadLanguage();">
-<div class="container">
-    
-    <div id="loading-overlay" style="display: none;">
-        <span id="loading-text" data-key="status_listening">Listening...</span>
-        <div class="spinner"></div>
-    </div>
-    
-    <select id="language-selector" onchange="setLanguage(this.value)">
-        <option value="en" selected>English</option>
-        <option value="hi">हिन्दी (Hindi)</option>
-        <option value="ta">தமிழ் (Tamil)</option>
-        <option value="te">తెలుగు (Telugu)</option>
-        <option value="bn">বাংলা (Bengali)</option>
-    </select>
-    
-    <button id="theme-toggle" aria-label="Toggle dark/light theme">
-        <span id="theme-icon">🌙</span>
-    </button>
+  <!-- GLOBAL LOADING OVERLAY (full screen) -->
+  <div id="loading-overlay" aria-live="polite" aria-busy="true">
+    <span id="loading-text" data-key="status_listening">Listening...</span>
+    <div class="spinner" role="img" aria-label="Loading"></div>
+  </div>
 
-    <h1 data-key="title">
-        <span class="icon">🎙️</span> AI Parkinson's Voice Risk Predictor
-    </h1>
-    <p data-key="instruction">Your task is to submit a 5-second sustained vowel sound (e.g., 'Aaaaaah').</p>
+  <div class="app">
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="brand">
+        <span class="icon">🎙️</span>
+        <span data-key="title">AI Parkinson's Voice Risk Predictor</span>
+      </div>
 
-    <button id="recordBtn" onclick="runPrediction()" data-key="button_text">Start Recording & Predict</button>
-    <div id="status" data-key="status_ready">Ready.</div>
-    
-    <div id="result">
-        <h2 data-key="summary_title">Prediction Summary:</h2>
-        <p><span data-key="summary_status">Status</span>: <span id="status_text" class="initial" data-key="awaiting_prediction">Awaiting prediction...</span></p>
-        <p><span data-key="summary_score">Risk Score (Probability of PD)</span>: <span id="score_text">--</span></p>
-        
-        <hr style="border: 0.5px solid var(--color-border); margin: 15px 0;">
-        <h3 data-key="advice_header" style="font-size: 1.2em; margin-bottom: 10px;">Precaution & Next Steps:</h3>
-        <p id="precaution_advice" class="None" style="font-size: 0.95em; line-height: 1.4;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <select id="language-selector" onchange="setLanguage(this.value)">
+          <option value="en" selected>English</option>
+          <option value="hi">हिन्दी (Hindi)</option>
+          <option value="ta">தமிழ் (Tamil)</option>
+          <option value="te">తెలుగు (Telugu)</option>
+          <option value="bn">বাংলা (Bengali)</option>
+        </select>
+
+        <button id="theme-toggle" aria-label="Toggle dark/light theme">
+          <span id="theme-icon">🌙</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Centered main content -->
+    <main class="content-wrap">
+      <section class="container">
+        <h1 style="display:none"><span class="icon">🎙️</span> <span data-key="title">AI Parkinson's Voice Risk Predictor</span></h1>
+        <p class="lead" data-key="instruction">
+          Your task is to submit a 5-second sustained vowel sound (e.g., 'Aaaaaah').
+        </p>
+
+        <button id="recordBtn" class="primary" onclick="runPrediction()" data-key="button_text">
+          Start Recording & Predict
+        </button>
+        <div id="status" data-key="status_ready">Ready.</div>
+
+        <div id="result">
+          <h2 data-key="summary_title">Prediction Summary:</h2>
+          <p><span data-key="summary_status">Status</span>:
+            <span id="status_text" class="initial" data-key="awaiting_prediction">Awaiting prediction...</span>
+          </p>
+          <p><span data-key="summary_score">Risk Score (Probability of PD)</span>:
+            <span id="score_text">--</span>
+          </p>
+
+          <hr style="border: .5px solid var(--color-border); margin: 14px 0;">
+          <h3 data-key="advice_header" style="font-size: 1.05rem; margin: 0 0 8px 0;">Precaution & Next Steps:</h3>
+          <p id="precaution_advice" class="None" style="font-size: .95rem; line-height: 1.45;">
             <span data-key="advice_initial">Run a prediction to see the guidance.</span>
-        </p>
+          </p>
 
-        <hr style="border: 0.5px solid var(--color-border); margin: 20px 0 10px 0;">
-        <p id="disclaimer" style="font-size: 0.8em; color: var(--color-danger-critical); font-weight: 600; text-align: center; line-height: 1.3;">
+          <hr style="border: .5px solid var(--color-border); margin: 18px 0 10px;">
+          <p id="disclaimer" style="font-size: .82rem; color: var(--color-danger-critical); font-weight: 700; text-align: center; line-height: 1.35;">
             <span data-key="disclaimer_text">
-                DISCLAIMER: This tool is for preliminary risk assessment only. It is NOT a medical diagnosis. Always consult a qualified physician or specialist for any health concerns or before making medical decisions.
+              DISCLAIMER: This tool is for preliminary risk assessment only. It is NOT a medical diagnosis. Always consult a qualified physician or specialist for any health concerns or before making medical decisions.
             </span>
-        </p>
-    </div>
-</div>
+          </p>
+        </div>
+      </section>
+    </main>
 
+    <footer>
+      <!-- You can put build/version or links here if desired -->
+    </footer>
+  </div>
 
-<script>
-// ===================================================================
-// I. LANGUAGE TRANSLATION DATA (UPDATED with status_listening)
-// ===================================================================
-
-const translations = {
-    // English (en)
-    'en': { 
+  <script>
+    // =========================================================
+    // I. TRANSLATIONS
+    // =========================================================
+    const translations = {
+      'en': {
         'title': "AI Parkinson's Voice Risk Predictor",
         'instruction': "Your task is to submit a 5-second sustained vowel sound (e.g., 'Aaaaaah').",
         'button_text': "Start Recording & Predict",
@@ -296,11 +319,7 @@ const translations = {
         'status_complete': "Prediction complete.",
         'status_analyzing': "...Analyzing...",
         'error_connection': "Connection Error",
-        
-        // --- NEW KEY ADDED ---
-        'status_listening': "Listening...", 
-        
-        // --- ADVICE KEYS ---
+        'status_listening': "Listening...",
         'advice_header': "Precaution & Next Steps:",
         'advice_initial': "Run a prediction to see the guidance.",
         'advice_Low_Risk': "This test shows a **Low Risk: General Wellness**. Maintain a healthy lifestyle by engaging in regular, vigorous aerobic exercise (like running or cycling). Consume a Mediterranean-style diet rich in antioxidants, whole foods, and moderate caffeine (coffee/tea).",
@@ -308,18 +327,14 @@ const translations = {
         'advice_High_Risk': "This test suggests **High Risk: Consultative**. If you have a first-degree relative with PD or symptoms like loss of smell (anosmia) or REM sleep disorder (RBD), consult a neurologist for a personalized risk assessment. Strictly eliminate chronic exposure to known environmental toxins.",
         'advice_Critical_Risk': "This test indicates **Critical Risk: Clinical Management**. If diagnosed with Parkinson's disease, strictly adhere to your prescribed medication regimen and notify your doctor immediately of any worsening symptoms. Engage in regular, specialized physical and occupational therapies.",
         'advice_Error': "Prediction failed. Check your microphone and internet connection, then try again. Results should never be used as medical advice.",
-        
-        // --- DISCLAIMER KEY ---
         'disclaimer_text': "DISCLAIMER: This tool is for preliminary risk assessment only. It is NOT a medical diagnosis. Always consult a qualified physician or specialist for any health concerns or before making medical decisions.",
-
-        // --- RISK CATEGORY NAMES (for display) ---
         'risk_Low_Risk': "Low Risk: General Wellness",
         'risk_Moderate_Risk': "Moderate Risk: Precautionary",
         'risk_High_Risk': "High Risk: Consultative",
         'risk_Critical_Risk': "Critical Risk: Clinical Management",
         'risk_Error': "Error",
-    },
-    'hi': { // Hindi
+      },
+      'hi': {
         'title': "एआई पार्किंसंस आवाज़ जोखिम भविष्यवक्ता",
         'instruction': "आपका कार्य 5-सेकंड की एक निरंतर स्वर ध्वनि (उदा. 'आआआआह') प्रस्तुत करना है।",
         'button_text': "रिकॉर्डिंग और भविष्यवाणी शुरू करें",
@@ -332,11 +347,7 @@ const translations = {
         'status_complete': "भविष्यवाणी पूरी हुई。",
         'status_analyzing': "...विश्लेषण हो रहा है。",
         'error_connection': "कनेक्शन त्रुटि",
-        
-        // --- NEW KEY ADDED ---
         'status_listening': "सुन रहा है...",
-        
-        // --- ADVICE KEYS ---
         'advice_header': "सावधानियाँ और अगले कदम:",
         'advice_initial': "मार्गदर्शन देखने के लिए एक भविष्यवाणी चलाएँ।",
         'advice_Low_Risk': "यह परीक्षण **कम जोखिम: सामान्य कल्याण** दिखाता है। नियमित, ज़ोरदार एरोबिक व्यायाम (जैसे दौड़ना या साइकिल चलाना) करके स्वस्थ जीवनशैली बनाए रखें। एंटीऑक्सीडेंट, साबुत खाद्य पदार्थों और मध्यम कैफीन (कॉफी/चाय) से भरपूर भूमध्यसागरीय-शैली का आहार लें।",
@@ -344,18 +355,14 @@ const translations = {
         'advice_High_Risk': "यह परीक्षण **उच्च जोखिम: परामर्शी** का सुझाव देता है। यदि आपके पास पीडी के साथ प्रथम-डिग्री का कोई रिश्तेदार है या सूंघने की क्षमता में कमी (एनोस्मिया) या आरबीडी जैसे लक्षण हैं, तो व्यक्तिगत जोखिम मूल्यांकन के लिए न्यूरोलॉजिस्ट से परामर्श लें। ज्ञात पर्यावरणीय विषाक्त पदार्थों के पुराने संपर्क को सख्ती से समाप्त करें।",
         'advice_Critical_Risk': "यह परीक्षण **गंभीर जोखिम: नैदानिक प्रबंधन** का संकेत देता है। यदि पार्किंसंस रोग का निदान किया गया है, तो अपने निर्धारित दवा आहार का सख्ती से पालन करें और लक्षणों के बिगड़ने पर तुरंत अपने डॉक्टर को सूचित करें। गतिशीलता, संतुलन और जीवन की गुणवत्ता बनाए रखने के लिए नियमित, विशेष शारीरिक और व्यावसायिक उपचार में संलग्न रहें।",
         'advice_Error': "भविष्यवाणी विफल। अपना माइक्रोफ़ोन और इंटरनेट कनेक्शन जांचें, फिर से प्रयास करें। परिणामों का उपयोग कभी भी चिकित्सकीय सलाह के रूप में नहीं किया जाना चाहिए।",
-        
-        // --- DISCLAIMER KEY ---
         'disclaimer_text': "अस्वीकरण: यह उपकरण केवल प्रारंभिक जोखिम मूल्यांकन के लिए है। यह चिकित्सा निदान नहीं है। किसी भी स्वास्थ्य चिंता के लिए या चिकित्सकीय निर्णय लेने से पहले हमेशा किसी योग्य चिकित्सक या विशेषज्ञ से परामर्श लें।",
-
-        // --- RISK CATEGORY NAMES (for display) ---
         'risk_Low_Risk': "कम जोखिम: सामान्य कल्याण",
         'risk_Moderate_Risk': "मध्यम जोखिम: एहतियाती",
         'risk_High_Risk': "उच्च जोखिम: परामर्शी",
         'risk_Critical_Risk': "गंभीर जोखिम: नैदानिक प्रबंधन",
         'risk_Error': "त्रुटि",
-    },
-    'ta': { // Tamil
+      },
+      'ta': {
         'title': "AI பார்கின்சன் குரல் ஆபத்து முன்னறிவிப்பான்",
         'instruction': "5 வினாடிகள் நீடித்த ஒரு உயிரெழுத்து ஒலியை (உம். 'ஆஆஆஆஹ்') சமர்ப்பிப்பதே உங்கள் பணி。",
         'button_text': "பதிவுசெய்து கணிக்கத் தொடங்கவும்",
@@ -368,11 +375,7 @@ const translations = {
         'status_complete': "முன்னறிவிப்பு நிறைவு。",
         'status_analyzing': "...பகுப்பாய்வு நடக்கிறது。",
         'error_connection': "இணைப்புப் பிழை",
-        
-        // --- NEW KEY ADDED ---
         'status_listening': "கேட்கிறது...",
-        
-        // --- ADVICE KEYS ---
         'advice_header': "முன்னெச்சரிக்கை மற்றும் அடுத்த படிகள்:",
         'advice_initial': "வழிகாட்டுதலைப் பார்க்க ஒரு கணிப்பை இயக்கவும்。",
         'advice_Low_Risk': "இந்தச் சோதனை **குறைந்த ஆபத்து: பொது நல்வாழ்வு** காட்டுகிறது。 வழக்கமான, தீவிரமான ஏரோபிக் உடற்பயிற்சியில் (ஓடுதல் அல்லது சைக்கிள் ஓட்டுதல் போன்றவை) ஈடுபடுவதன் மூலம் ஆரோக்கியமான வாழ்க்கை முறையைப் பராமரிக்கவும்。 ஆக்ஸிஜனேற்றிகள், முழு உணவுகள் மற்றும் மிதமான காஃபின் (காபி/தேநீர்) நிறைந்த மத்திய தரைக்கடல் பாணி உணவை உட்கொள்ளவும்。",
@@ -380,18 +383,14 @@ const translations = {
         'advice_High_Risk': "இந்தச் சோதனை **அதிக ஆபத்து: ஆலோசனை** அறிவுறுத்துகிறது。 உங்களுக்கு PD உள்ள முதல் நிலை உறவினர் அல்லது வாசனை இழப்பு (anosmia) அல்லது REM தூக்கக் கோளாறு (RBD) போன்ற அறிகுறிகள் இருந்தால், தனிப்பயனாக்கப்பட்ட இடர் மதிப்பீட்டிற்கு நரம்பியல் நிபுணரை அணுகவும்。 அறியப்பட்ட சுற்றுச்சூழல் நச்சுகளின் நாள்பட்ட வெளிப்பாட்டை கண்டிப்பாக அகற்றவும்。",
         'advice_Critical_Risk': "இந்தச் சோதனை **கடுமையான ஆபத்து: மருத்துவ மேலாண்மை** குறிக்கிறது。 பார்கின்சன் நோயால் பாதிக்கப்பட்டிருந்தால், உங்கள் பரிந்துரைக்கப்பட்ட மருந்து முறையை கண்டிப்பாகப் பின்பற்றுங்கள் மற்றும் அறிகுறிகள் மோசமடைந்தால் உடனடியாக உங்கள் மருத்துவரிடம் தெரிவிக்கவும்。 இயக்கம், சமநிலை மற்றும் வாழ்க்கைத் தரத்தை பராமரிக்க வழக்கமான, சிறப்பு உடற்பயிற்சி மற்றும் தொழில்சார் சிகிச்சைகளில் ஈடுபடவும்。",
         'advice_Error': "கணிப்பு தோல்வியடைந்தது。 உங்கள் மைக்ரோஃபோன் மற்றும் இணைய இணைப்பைச் சரிபார்த்து, மீண்டும் முயற்சிக்கவும்。 முடிவுகள் ஒருபோதும் மருத்துவ ஆலோசனையாகப் பயன்படுத்தப்படக்கூடாது。",
-        
-        // --- DISCLAIMER KEY ---
         'disclaimer_text': "மறுப்பு: இந்தக் கருவி ஆரம்ப ஆபத்து மதிப்பீட்டிற்கு மட்டுமே. இது மருத்துவ நோயறிதல் அல்ல. எந்தவொரு உடல்நலக் கவலைகளுக்கும் அல்லது மருத்துவ முடிவுகளை எடுப்பதற்கு முன்பும் எப்போதும் ஒரு தகுதிவாய்ந்த மருத்துவர் அல்லது நிபுணரை அணுகவும்。",
-
-        // --- RISK CATEGORY NAMES (for display) ---
         'risk_Low_Risk': "குறைந்த ஆபத்து: பொது நல்வாழ்வு",
         'risk_Moderate_Risk': "மிதமான ஆபத்து: முன்னெச்சரிக்கை",
         'risk_High_Risk': "அதிக ஆபத்து: ஆலோசனை",
         'risk_Critical_Risk': "கடுமையான ஆபத்து: மருத்துவ மேலாண்மை",
         'risk_Error': "பிழை",
-    },
-    'te': { // Telugu
+      },
+      'te': {
         'title': "AI పార్కిన్సన్స్ వాయిస్ రిస్క్ ప్రిడిక్టర్",
         'instruction': "మీ పని 5-సెకన్ల నిలకడైన అచ్చు ధ్వనిని (ఉదా. 'ఆఆఆఆహ్') సమర్పించడం。",
         'button_text': "రికార్డింగ్ & అంచనా ప్రారంభించండి",
@@ -404,11 +403,7 @@ const translations = {
         'status_complete': "అంచనా పూర్తయింది。",
         'status_analyzing': "...విశ్లేషణ జరుగుతోంది。",
         'error_connection': "కనెక్షన్ లోపం",
-        
-        // --- NEW KEY ADDED ---
         'status_listening': "వింటుంది...",
-        
-        // --- ADVICE KEYS ---
         'advice_header': "జాగ్రత్త మరియు తదుపరి చర్యలు:",
         'advice_initial': "మార్గదర్శకత్వం చూడటానికి అంచనాను అమలు చేయండి。",
         'advice_Low_Risk': "ఈ పరీక్ష **తక్కువ ప్రమాదం: సాధారణ శ్రేయస్సు** చూపుతుంది。 క్రమం తప్పకుండా, శక్తివంతమైన ఏరోబిక్ వ్యాయామంలో (పరిగెత్తడం లేదా సైక్లింగ్ వంటివి) పాల్గొనడం ద్వారా ఆరోగ్యకరమైన జీవనశైలిని నిర్వహించండి。 యాంటీఆక్సిడెంట్లు, పూర్తి ఆహారాలు మరియు మితమైన కెఫిన్ (కాఫీ/టీ) సమృద్ధిగా ఉన్న మధ్యధరా-శైలి ఆహారాన్ని తీసుకోండి。",
@@ -416,20 +411,16 @@ const translations = {
         'advice_High_Risk': "ఈ పరీక్ష **అధిక ప్రమాదం: సంప్రదింపు** సూచిస్తుంది。 మీకు PD ఉన్న మొదటి-స్థాయి బంధువు ఉన్నట్లయితే లేదా వాసన కోల్పోవడం (అనోస్మియా) లేదా REM నిద్ర రుగ్మత (RBD) వంటి లక్షణాలు ఉన్నట్లయితే, వ్యక్తిగతీకరించిన ప్రమాద అంచనా కోసం న్యూరాలజిస్ట్‌ను సంప్రదించండి。 తెలిసిన పర్యావరణ విషపదార్థాలకు దీర్ఘకాలిక బహిర్గతంను ఖచ్చితంగా తొలగించండి。",
         'advice_Critical_Risk': "ఈ పరీక్ష **తీవ్రమైన ప్రమాదం: క్లినికల్ నిర్వహణ** సూచిస్తుంది。 పార్కిన్సన్స్ వ్యాధి నిర్ధారణ అయినట్లయితే, మీ సూచించిన మందుల నియమావళిని ఖచ్చితంగా పాటించండి మరియు లక్షణాలు మరింత తీవ్రమైతే వెంటనే మీ డాక్టర్‌కు తెలియజేయండి。 చలనశీలత, సమతుల్యత మరియు జీవన నాణ్యతను కాపాడుకోవడానికి క్రమం తప్పకుండా, ప్రత్యేకమైన శారీరక మరియు వృత్తిపరమైన చికిత్సలలో పాల్గొనండి。",
         'advice_Error': "అంచనా విఫలమైంది。 మీ మైక్రోఫోన్ మరియు ఇంటర్నెట్ కనెక్షన్‌ను తనిఖీ చేసి, మళ్లీ ప్రయత్నించండి. ఫలితాలను వైద్య సలహాగా ఎప్పుడూ ఉపయోగించకూడదు。",
-
-        // --- DISCLAIMER KEY ---
         'disclaimer_text': "నిరాకరణ: ఈ సాధనం కేవలం ప్రాథమిక ప్రమాద అంచనా కోసం మాత్రమే. ఇది వైద్య నిర్ధారణ కాదు. ఏదైనా ఆరోగ్య సమస్యలకు లేదా వైద్య నిర్ణయాలు తీసుకునే ముందు ఎల్లప్పుడూ అర్హత కలిగిన వైద్యుడు లేదా నిపుణుడిని సంప్రదించండి。",
-
-        // --- RISK CATEGORY NAMES (for display) ---
         'risk_Low_Risk': "తక్కువ ప్రమాదం: సాధారణ శ్రేయస్సు",
         'risk_Moderate_Risk': "మితమైన ప్రమాదం: జాగ్రత్త",
         'risk_High_Risk': "అధిక ప్రమాదం: సంప్రదింపు",
         'risk_Critical_Risk': "తీవ్రమైన ప్రమాదం: క్లినికల్ నిర్వహణ",
         'risk_Error': "లోపం",
-    },
-    'bn': { // Bengali
+      },
+      'bn': {
         'title': "এআই পারকিনসন্সের ভয়েস ঝুঁকি পূর্বাভাসক",
-        'instruction': "আপনার কাজ হলো ৫-সেকেন্ডের জন্য একটি দীর্ঘ স্বরধ্বনি (যেমন: 'আআআআহ') জমা দেওয়া।",
+        'instruction': "আপনার কাজ হলো ৫-সেকেন্ডের জন্য একটি দীর্ঘ স্বরধ্বনি (যেমন: 'আআআআহ') জমা দেওয়া।",
         'button_text': "রেকর্ডিং ও পূর্বাভাস শুরু করুন",
         'status_ready': "প্রস্তুত।",
         'summary_title': "পূর্বাভাসের সারাংশ:",
@@ -440,192 +431,137 @@ const translations = {
         'status_complete': "পূর্বাভাস সম্পন্ন হয়েছে।",
         'status_analyzing': "...বিশ্লেষণ করা হচ্ছে。",
         'error_connection': "সংযোগ ত্রুটি",
-        
-        // --- NEW KEY ADDED ---
         'status_listening': "শুনছি...",
-        
-        // --- ADVICE KEYS ---
         'advice_header': "সতর্কতা ও পরবর্তী পদক্ষেপ:",
         'advice_initial': "নির্দেশিকা দেখতে একটি পূর্বাভাস চালান।",
-        'advice_Low_Risk': "এই পরীক্ষাটি **কম ঝুঁকি: সাধারণ সুস্থতা** দেখায়। নিয়মিত, জোরদার অ্যারোবিক ব্যায়ামে (যেমন দৌড়ানো বা সাইকেল চালানো) অংশ নিয়ে একটি স্বাস্থ্যকর জীবনধারা বজায় রাখুন। অ্যান্টিঅক্সিডেন্ট, পুরো শস্য এবং মাঝারি ক্যাফেইন (কফি/চা) সমৃদ্ধ ভূমধ্যসাগরীয়-শৈলীর খাবার গ্রহণ করুন।",
+        'advice_Low_Risk': "এই পরীক্ষাটি **কম ঝুঁকি: সাধারণ সুস্থতা** দেখায়। নিয়মিত, জোরদার অ্যারোবিক ব্যায়ামে (যেমন দৌড়ানো বা সাইকেল চালানো) অংশ নিয়ে একটি স্বাস্থ্যকর জীবনধারা বজায় রাখুন। অ্যান্টিঅক্সিডেন্ট, পুরো শস্য এবং মাঝারি ক্যাফেইন (কফি/চা) সমৃদ্ধ ভূমধ্যসাগরীয়-শৈলীর খাবার গ্রহণ করুন।",
         'advice_Moderate_Risk': "এই পরীক্ষাটি **মাঝারি ঝুঁকি: সতর্কতামূলক** নির্দেশ করে। যদি আপনার বয়স ৬০-এর বেশি বা আপনি পুরুষ হন, তবে নিয়মিত ব্যায়াম এবং বিপাকীয় স্বাস্থ্যের (যেমন রক্তচাপ এবং শর্করা) আক্রমণাত্মক ব্যবস্থাপনাকে অগ্রাধিকার দিন। পেশাগত বা বাগান করার ক্ষেত্রে সুরক্ষামূলক গিয়ার ব্যবহার করে সম্ভাব্য বিষাক্ত পদার্থ (কীটনাশক, দ্রাবক) এর সংস্পর্শকে সক্রিয়ভাবে হ্রাস করুন।",
         'advice_High_Risk': "এই পরীক্ষাটি **উচ্চ ঝুঁকি: পরামর্শমূলক** নির্দেশ করে। যদি আপনার প্রথম-ডিগ্রী আত্মীয়ের পিডি থাকে বা গন্ধের অনুভূতি হ্রাস (অ্যানোসমিয়া) বা আরইএম ঘুমের ব্যাধি (আরবিডি) এর মতো লক্ষণ থাকে, তবে ব্যক্তিগতকৃত ঝুঁকি মূল্যায়নের জন্য একজন নিউরোলজিস্টের সাথে পরামর্শ করুন। পরিচিত পরিবেশগত বিষাক্ত পদার্থগুলির দীর্ঘস্থায়ী এক্সপোজার কঠোরভাবে এড়িয়ে চলুন।",
-        'advice_Critical_Risk': "এই পরীক্ষাটি **সংকটজনক ঝুঁকি: ক্লিনিকাল ব্যবস্থাপনা** নির্দেশ করে। যদি পারকিনসন্সের রোগ নির্ণয় হয়, তবে আপনার নির্ধারিত ওষুধের নিয়মাবলী কঠোরভাবে মেনে চলুন এবং লক্ষণগুলি খারাপ হলে অবিলম্বে আপনার ডাক্তারকে জানান। গতিশীলতা, ভারসাম্য এবং জীবনযাত্রার মান বজায় রাখতে নিয়মিত, বিশেষ শারীরিক ও বৃত্তিমূলক থেরাপিতে নিযুক্ত হন।",
+        'advice_Critical_Risk': "এই পরীক্ষাটি **সংকটজনক ঝুঁকি: ক্লিনিকাল ব্যবস্থাপনা** নির্দেশ করে। যদি পারকিনসন্সের রোগ নির্ণয় হয়, তবে আপনার নির্ধারিত ওষুধের নিয়মাবলী কঠোরভাবে মেনে চলুন এবং লক্ষণগুলি খারাপ হলে অবিলম্বে আপনার ডাক্তারকে জানান। গতিশীলতা, ভারসাম্য এবং জীবনযাত্রার মান বজায় রাখতে নিয়মিত, বিশেষ শারীরিক ও বৃত্তিমূলক থেরাপিতে নিযুক্ত হন।",
         'advice_Error': "পূর্বাভাস ব্যর্থ হয়েছে। আপনার মাইক্রোফোন এবং ইন্টারনেট সংযোগ পরীক্ষা করুন, তারপর আবার চেষ্টা করুন। ফলাফলগুলি কখনওই চিকিৎসার পরামর্শ হিসাবে ব্যবহার করা উচিত নয়।",
-        
-        // --- DISCLAIMER KEY ---
         'disclaimer_text': "দাবিত্যাগ: এই সরঞ্জামটি শুধুমাত্র প্রাথমিক ঝুঁকি মূল্যায়নের জন্য। এটি কোনো চিকিৎসা রোগ নির্ণয় নয়। যেকোনো স্বাস্থ্য সংক্রান্ত উদ্বেগের জন্য বা চিকিৎসা সংক্রান্ত সিদ্ধান্ত নেওয়ার আগে সর্বদা একজন যোগ্য চিকিৎসক বা বিশেষজ্ঞের সাথে পরামর্শ করুন।",
-
-        // --- RISK CATEGORY NAMES (for display) ---
         'risk_Low_Risk': "কম ঝুঁকি: সাধারণ সুস্থতা",
         'risk_Moderate_Risk': "মাঝারি ঝুঁকি: সতর্কতামূলক",
         'risk_High_Risk': "উচ্চ ঝুঁকি: পরামর্শমূলক",
         'risk_Critical_Risk': "সংকটজনক ঝুঁকি: ক্লিনিকাল ব্যবস্থাপনা",
         'risk_Error': "ত্রুটি",
+      }
+    };
+
+    let currentLanguage = 'en';
+    const loadingOverlay = document.getElementById('loading-overlay');
+
+    // =========================================================
+    // II. LANGUAGE SWITCHING
+    // =========================================================
+    function updateContent() {
+      const langData = translations[currentLanguage];
+
+      document.querySelectorAll('[data-key]').forEach(el => {
+        const key = el.getAttribute('data-key');
+        if (langData && langData[key]) el.innerText = langData[key];
+      });
+
+      const statusEl = document.getElementById('status');
+      const recordBtn = document.getElementById('recordBtn');
+      if (recordBtn && langData['button_text']) recordBtn.innerText = langData['button_text'];
+
+      if (statusEl && langData['status_ready']) {
+        const anyReady = Object.values(translations).some(t => t.status_ready === statusEl.innerText.trim());
+        if (statusEl.innerText.trim() === 'Ready.' || anyReady) statusEl.innerText = langData['status_ready'];
+      }
     }
-};
-
-let currentLanguage = 'en';
-
-const loadingOverlay = document.getElementById('loading-overlay'); 
-
-
-// ===================================================================
-// II. LANGUAGE SWITCHING LOGIC 
-// ===================================================================
-
-function updateContent() {
-    const langData = translations[currentLanguage];
-    
-    document.querySelectorAll('[data-key]').forEach(element => {
-        const key = element.getAttribute('data-key');
-        if (langData && langData[key]) {
-            element.innerText = langData[key];
-        }
-    });
-
-    const statusElement = document.getElementById('status');
-    const recordBtn = document.getElementById('recordBtn');
-
-    if (recordBtn && langData && langData['button_text']) {
-        recordBtn.innerText = langData['button_text'];
+    function setLanguage(code) {
+      if (currentLanguage === code) return;
+      currentLanguage = code;
+      localStorage.setItem('language', code);
+      updateContent();
+      loadTheme();
     }
-
-    if (statusElement && langData && langData['status_ready']) {
-        if (statusElement.innerText.trim() === 'Ready.' || Object.values(translations).some(t => t.status_ready === statusElement.innerText.trim())) {
-             statusElement.innerText = langData['status_ready'];
-        }
-    }
-}
-
-function setLanguage(langCode) {
-    if (currentLanguage === langCode) return;
-    
-    currentLanguage = langCode;
-    localStorage.setItem('language', langCode);
-    updateContent();
-    loadTheme(); 
-}
-
-function loadLanguage() {
-    const savedLang = localStorage.getItem('language');
-    if (savedLang && translations[savedLang]) {
-        currentLanguage = savedLang;
-    } else {
-        currentLanguage = 'en';
+    function loadLanguage() {
+      const saved = localStorage.getItem('language');
+      currentLanguage = (saved && translations[saved]) ? saved : 'en';
+      const selector = document.getElementById('language-selector');
+      if (selector) selector.value = currentLanguage;
+      updateContent();
     }
 
-    const selector = document.getElementById('language-selector');
-    if (selector) {
-        selector.value = currentLanguage;
+    // =========================================================
+    // III. THEME TOGGLE
+    // =========================================================
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+
+    function toggleTheme() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      themeIcon.innerText = isDark ? '☀️' : '🌙';
     }
-    updateContent();
-}
-
-
-// ===================================================================
-// III. THEME TOGGLE FUNCTIONALITY
-// ===================================================================
-
-const themeToggle = document.getElementById('theme-toggle');
-const themeIcon = document.getElementById('theme-icon');
-
-function toggleTheme() {
-    const isDarkMode = document.body.classList.toggle('dark-mode');
-    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-    themeIcon.innerText = isDarkMode ? '☀️' : '🌙';
-}
-
-function loadTheme() {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-        themeIcon.innerText = '☀️';
-    } else {
-        document.body.classList.remove('dark-mode');
-        themeIcon.innerText = '🌙';
+    function loadTheme() {
+      const saved = localStorage.getItem('theme');
+      const isDark = saved === 'dark';
+      document.body.classList.toggle('dark-mode', isDark);
+      themeIcon.innerText = isDark ? '☀️' : '🌙';
     }
-}
+    themeToggle.addEventListener('click', toggleTheme);
 
-themeToggle.addEventListener('click', toggleTheme);
+    // =========================================================
+    // IV. PREDICTION (Overlay now covers FULL SCREEN)
+    // =========================================================
+    function runPrediction() {
+      const langData = translations[currentLanguage];
 
+      // Start loading
+      loadingOverlay.style.display = 'flex';
+      document.getElementById('recordBtn').disabled = true;
+      document.getElementById('status').innerText = langData['status_recording'];
 
-// ===================================================================
-// IV. PREDICTION FUNCTIONALITY
-// ===================================================================
+      const statusTextEl = document.getElementById('status_text');
+      const adviceEl = document.getElementById('precaution_advice');
 
-function runPrediction() {
-    const langData = translations[currentLanguage];
-    
-    // 1. START LOADING STATE
-    loadingOverlay.style.display = 'flex'; // SHOW THE SPINNER/OVERLAY
-    document.getElementById('recordBtn').disabled = true;
-    
-    // Note: The status text remains 'Recording in progress... Please speak now.' 
-    // This is hidden behind the overlay, but still set for consistency.
-    document.getElementById('status').innerText = langData['status_recording']; 
-    
-    const statusTextElement = document.getElementById('status_text');
-    const adviceElement = document.getElementById('precaution_advice');
+      statusTextEl.innerText = langData['status_analyzing'];
+      statusTextEl.className = 'initial';
+      document.getElementById('score_text').innerText = '--';
+      adviceEl.innerHTML = langData['advice_initial'];
+      adviceEl.className = 'None';
 
-    statusTextElement.innerText = langData['status_analyzing'];
-    statusTextElement.className = 'initial';
-    document.getElementById('score_text').innerText = '--';
-    
-    adviceElement.innerHTML = langData['advice_initial'];
-    adviceElement.className = 'None';
+      fetch('/predict', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+          loadingOverlay.style.display = 'none';
+          document.getElementById('recordBtn').disabled = false;
+          document.getElementById('status').innerText = langData['status_complete'];
 
-    // Send POST request to the Flask backend to trigger recording and prediction
-    fetch('/predict', { method: 'POST' })
-    .then(response => response.json())
-    .then(data => {
-        // 2. END LOADING STATE (SUCCESS)
-        loadingOverlay.style.display = 'none'; // HIDE THE SPINNER/OVERLAY
-        document.getElementById('recordBtn').disabled = false;
-        
-        document.getElementById('status').innerText = langData['status_complete'];
-        
-        if (data.error) {
-            // ERROR HANDLING
-            statusTextElement.innerText = langData['error_connection'] || 'Error'; 
-            statusTextElement.className = 'Error';
+          if (data.error) {
+            statusTextEl.innerText = langData['error_connection'] || 'Error';
+            statusTextEl.className = 'Error';
             document.getElementById('score_text').innerText = '--';
-            
-            adviceElement.innerHTML = langData['advice_Error'] || 'An error occurred.';
-            adviceElement.className = 'Error';
+            adviceEl.innerHTML = langData['advice_Error'] || 'An error occurred.';
+            adviceEl.className = 'Error';
             return;
-        }
-        
-        // Successful Prediction
-        const riskCategory = data.risk_category.replace(/\s/g, '_');
-        const categoryKey = 'risk_' + riskCategory;
-        const adviceKey = 'advice_' + riskCategory;
-        
-        const translatedStatus = langData[categoryKey] || data.status;
-        statusTextElement.innerText = translatedStatus;
-        statusTextElement.className = riskCategory; 
+          }
 
-        document.getElementById('score_text').innerText = data.score;
-        
-        adviceElement.innerHTML = langData[adviceKey] || langData['advice_Error'];
-        adviceElement.className = riskCategory;
-    })
-    .catch(error => {
-        // 3. END LOADING STATE (CATCH/ERROR)
-        loadingOverlay.style.display = 'none'; // HIDE THE SPINNER/OVERLAY
-        document.getElementById('recordBtn').disabled = false;
-        
-        document.getElementById('status').innerText = langData['error_connection'] + ". Check console for details.";
-        document.getElementById('status_text').innerText = langData['error_connection'];
-        document.getElementById('status_text').className = 'Error';
-        
-        document.getElementById('precaution_advice').innerHTML = langData['advice_Error'];
-        document.getElementById('precaution_advice').className = 'Error';
+          const riskCategory = data.risk_category.replace(/\s/g, '_');
+          const translatedStatus = langData['risk_' + riskCategory] || data.status;
 
-        console.error('Fetch error:', error);
-    });
-}
-</script>
+          statusTextEl.innerText = translatedStatus;
+          statusTextEl.className = riskCategory;
+          document.getElementById('score_text').innerText = data.score;
 
+          adviceEl.innerHTML = langData['advice_' + riskCategory] || langData['advice_Error'];
+          adviceEl.className = riskCategory;
+        })
+        .catch(err => {
+          loadingOverlay.style.display = 'none';
+          document.getElementById('recordBtn').disabled = false;
+          document.getElementById('status').innerText = langData['error_connection'] + ". Check console for details.";
+          statusTextEl.innerText = langData['error_connection'];
+          statusTextEl.className = 'Error';
+          adviceEl.innerHTML = langData['advice_Error'];
+          adviceEl.className = 'Error';
+          console.error('Fetch error:', err);
+        });
+    }
+  </script>
 </body>
 </html>
