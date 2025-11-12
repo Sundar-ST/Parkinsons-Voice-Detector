@@ -508,60 +508,78 @@
     // =========================================================
     // IV. PREDICTION (Overlay now covers FULL SCREEN)
     // =========================================================
-    function runPrediction() {
-      const langData = translations[currentLanguage];
+function runPrediction() {
+  const langData = translations[currentLanguage];
+  const statusEl = document.getElementById('status');
+  const recordBtn = document.getElementById('recordBtn');
+  const loadingTextEl = document.getElementById('loading-text');
+  const statusTextEl = document.getElementById('status_text');
+  const adviceEl = document.getElementById('precaution_advice');
 
-      // Start loading
-      loadingOverlay.style.display = 'flex';
-      document.getElementById('recordBtn').disabled = true;
-      document.getElementById('status').innerText = langData['status_recording'];
+  // --- 1. Initial State Setup (Start Recording/Listening Phase) ---
+  loadingOverlay.style.display = 'flex';
+  loadingOverlay.setAttribute('aria-busy', 'true'); // Announce start of busy state
+  recordBtn.disabled = true;
+  statusEl.innerText = langData['status_recording'];
+  loadingTextEl.innerText = langData['status_listening']; // Set overlay text to 'Listening...'
 
-      const statusTextEl = document.getElementById('status_text');
-      const adviceEl = document.getElementById('precaution_advice');
+  // Reset results area
+  statusTextEl.innerText = langData['awaiting_prediction'];
+  statusTextEl.className = 'initial';
+  document.getElementById('score_text').innerText = '--';
+  adviceEl.innerHTML = langData['advice_initial'];
+  adviceEl.className = 'None';
 
-      statusTextEl.innerText = langData['status_analyzing'];
-      statusTextEl.className = 'initial';
-      document.getElementById('score_text').innerText = '--';
-      adviceEl.innerHTML = langData['advice_initial'];
-      adviceEl.className = 'None';
+  // --- 2. Simulate 5-second Recording/Listening Time ---
+  // Use a timeout to transition to the "Analyzing" state after the simulated recording
+  setTimeout(() => {
+    // Transition to Analyzing Phase UI
+    loadingTextEl.innerText = langData['status_analyzing']; // Change overlay text to '...Analyzing...'
+    statusEl.innerText = langData['status_analyzing']; // Update status below button
 
-      fetch('/predict', { method: 'POST' })
-        .then(r => r.json())
-        .then(data => {
-          loadingOverlay.style.display = 'none';
-          document.getElementById('recordBtn').disabled = false;
-          document.getElementById('status').innerText = langData['status_complete'];
+    // --- 3. Run the Fetch API call (Analysis) ---
+    fetch('/predict', { method: 'POST' })
+      .then(r => r.json())
+      .then(data => {
+        // --- 4. Prediction Complete (Success or Error) ---
+        loadingOverlay.style.display = 'none';
+        loadingOverlay.setAttribute('aria-busy', 'false'); // Announce end of busy state
+        recordBtn.disabled = false;
+        statusEl.innerText = langData['status_complete'];
 
-          if (data.error) {
-            statusTextEl.innerText = langData['error_connection'] || 'Error';
-            statusTextEl.className = 'Error';
-            document.getElementById('score_text').innerText = '--';
-            adviceEl.innerHTML = langData['advice_Error'] || 'An error occurred.';
-            adviceEl.className = 'Error';
-            return;
-          }
-
-          const riskCategory = data.risk_category.replace(/\s/g, '_');
-          const translatedStatus = langData['risk_' + riskCategory] || data.status;
-
-          statusTextEl.innerText = translatedStatus;
-          statusTextEl.className = riskCategory;
-          document.getElementById('score_text').innerText = data.score;
-
-          adviceEl.innerHTML = langData['advice_' + riskCategory] || langData['advice_Error'];
-          adviceEl.className = riskCategory;
-        })
-        .catch(err => {
-          loadingOverlay.style.display = 'none';
-          document.getElementById('recordBtn').disabled = false;
-          document.getElementById('status').innerText = langData['error_connection'] + ". Check console for details.";
-          statusTextEl.innerText = langData['error_connection'];
+        if (data.error) {
+          statusTextEl.innerText = langData['error_connection'] || 'Error';
           statusTextEl.className = 'Error';
-          adviceEl.innerHTML = langData['advice_Error'];
+          document.getElementById('score_text').innerText = '--';
+          adviceEl.innerHTML = langData['advice_Error'] || 'An error occurred.';
           adviceEl.className = 'Error';
-          console.error('Fetch error:', err);
-        });
-    }
+          return;
+        }
+
+        const riskCategory = data.risk_category.replace(/\s/g, '_');
+        const translatedStatus = langData['risk_' + riskCategory] || data.status;
+
+        statusTextEl.innerText = translatedStatus;
+        statusTextEl.className = riskCategory;
+        document.getElementById('score_text').innerText = data.score;
+
+        adviceEl.innerHTML = langData['advice_' + riskCategory] || langData['advice_Error'];
+        adviceEl.className = riskCategory;
+      })
+      .catch(err => {
+        // --- 4. Prediction Complete (Catch Error) ---
+        loadingOverlay.style.display = 'none';
+        loadingOverlay.setAttribute('aria-busy', 'false'); // Announce end of busy state
+        recordBtn.disabled = false;
+        statusEl.innerText = langData['error_connection'] + ". Check console for details.";
+        statusTextEl.innerText = langData['error_connection'];
+        statusTextEl.className = 'Error';
+        adviceEl.innerHTML = langData['advice_Error'];
+        adviceEl.className = 'Error';
+        console.error('Fetch error:', err);
+      });
+  }, 5000); // Wait 5 seconds to simulate recording
+}
   </script>
 </body>
 </html>
