@@ -62,8 +62,8 @@ def main():
     # Some imports failed
     print('\nRESULT: Some imports failed. Suggested next steps:')
     print('  1) Activate your virtual environment and install pinned dependencies:')
-    print('       python -m venv .\\venv')
-    print('       .\\venv\\Scripts\\Activate.ps1')
+    print('       python -m venv .\\parkinsons')
+    print('       .\\parkinsons\\Scripts\\Activate.ps1')
     print('       python -m pip install --upgrade pip wheel')
     print('       pip install -r requirements.txt')
     print('\n  2) If Parselmouth import fails and you are on Python 3.10, install the provided wheel:')

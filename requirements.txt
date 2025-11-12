@@ -17,7 +17,7 @@ numba==0.56.4
 sounddevice==0.4.6
 
 # Parselmouth (fetched directly from PyPI for Python 3.10 on Windows)
-praat_parselmouth @ https://files.pythonhosted.org/packages/83/d0/a5383230ed55c262fb6d774828c7e9465939472f45acf4571d953cb247e2/praat_parselmouth-0.4.6-cp310-cp310-win_amd64.whl
+#praat_parselmouth @ https://files.pythonhosted.org/packages/83/d0/a5383230ed55c262fb6d774828c7e9465939472f45acf4571d953cb247e2/praat_parselmouth-0.4.6-cp310-cp310-win_amd64.whl
 
 # Optional (uncomment if needed)
 # matplotlib==3.7.1
