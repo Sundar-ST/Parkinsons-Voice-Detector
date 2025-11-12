@@ -12,7 +12,7 @@ This project records a short voice sample, extracts features with Praat/Parselmo
 2. Create and activate a virtual environment
 
 ```powershell
-python -m venv .\venv
+python -m venv .\parkinsons
 # Activate (PowerShell)
 .\venv\Scripts\Activate.ps1
 # Upgrade pip and wheel
