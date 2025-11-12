@@ -7,49 +7,85 @@ This project records a short voice sample, extracts features with Praat/Parselmo
 - (See `requirements.txt` for exact pinned versions)
 
 ## Quick setup (Windows PowerShell)
+
+⚠️ **Recommendation**: If you have Anaconda/Miniconda, use `conda env create -f environment.yml` below (easier, fewer build issues). Otherwise, follow the venv steps below.
+
 1. Open PowerShell in the repository root (e.g. `c:\Users\hp\Documents\Parkinsons-Voice-Detection`).
 
 2. Create and activate a virtual environment
 
 ```powershell
 python -m venv .\parkinsons
-# Activate (PowerShell)
-# Activate (PowerShell)
 .\parkinsons\Scripts\Activate.ps1
-# Upgrade pip and wheel
-python -m pip install --upgrade pip wheel
 ```
 
-3. Install pinned dependencies
+3. **CRITICAL: Upgrade pip, setuptools, wheel and build tools**
+
+```powershell
+python -m pip install --upgrade pip setuptools wheel build
+```
+
+**Why this step is essential**: Without upgrading, pip may fail to build packages from source (especially numba, scipy, soundfile). This step must be done before installing requirements.
+
+4. Install dependencies
 
 ```powershell
 pip install -r .\requirements.txt
 ```
 
-This will fetch and install all packages including Parselmouth from PyPI automatically.
+**Note**: `requirements.txt` uses flexible version ranges to maximize compatibility across Python versions. It also includes `praat-parselmouth` (minimum version >= 0.4.6); pip will attempt to fetch a compatible prebuilt wheel from PyPI during `pip install -r requirements.txt`.
+
+If pip cannot find a compatible Parselmouth wheel for your Python, the install may fall back to building from source (which often fails on Windows). In that case either:
+
+- Use the conda route (`environment.yml`) which provides prebuilt binaries (recommended), or
+- Install the matching Parselmouth wheel manually (see the Parselmouth installation section), using `--no-cache-dir` if you see "not a supported wheel" errors.
+
+## Parselmouth installation (for venv users)
+
+Parselmouth is needed by `mvp_core.py` to extract voice features. Install it based on your setup:
+
+**For Windows Python 3.10** (recommended for venv):
+```powershell
+pip install --no-cache-dir "praat_parselmouth @ https://files.pythonhosted.org/packages/83/d0/a5383230ed55c262fb6d774828c7e9465939472f45acf4571d953cb247e2/praat_parselmouth-0.4.6-cp310-cp310-win_amd64.whl"
+```
+
+(Note: use `--no-cache-dir` flag if you get "not a supported wheel" errors — this clears any corrupted cached wheels.)
+
+**For other Python versions or if the above fails**:
+- Try `pip install praat-parselmouth` (pip will attempt to find a matching wheel on PyPI).
+- Or use the conda path instead (see "Quick setup with Anaconda" below) — it handles Parselmouth automatically.
 
 ## Quick setup with Anaconda (alternative)
 
-If you're using Anaconda or Miniconda instead of standard Python:
+If you're using Anaconda or Miniconda, use the provided `environment.yml` file for a one-command setup.
 
-1. Create a conda environment with Python 3.10
+### Recommended: environment.yml (Python 3.10, pinned Parselmouth wheel)
+
+```powershell
+conda env create -f environment.yml
+conda activate parkinsons
+```
+
+This creates the `parkinsons` environment with Python 3.10, conda-forge packages, and the Parselmouth wheel for Windows pre-configured. This is the most reliable approach for Parselmouth.
+
+### Flexible alternative: environment-flex.yml (Python 3.10-3.11, auto Parselmouth)
+
+If you prefer flexibility with Python versions (3.10 or 3.11), use:
+
+```powershell
+conda env create -f environment-flex.yml
+conda activate parkinsons-flex
+```
+
+This allows pip to attempt auto-installing Parselmouth from PyPI. If pip cannot find a matching wheel for your Python, you'll need to install it manually or use the standard `environment.yml` above.
+
+### Manual conda install (if you don't want to use yml files)
 
 ```powershell
 conda create -n parkinsons python=3.10
 conda activate parkinsons
-```
-
-2. Install dependencies from `requirements.txt`
-
-```powershell
-pip install -r .\requirements.txt
-```
-
-Or, if you prefer conda for all packages (except Parselmouth, which is fetched via pip):
-
-```powershell
-conda install flask numpy pandas scikit-learn joblib librosa scipy resampy audioread soundfile numba sounddevice -y
-pip install praat_parselmouth @ https://files.pythonhosted.org/packages/83/d0/a5383230ed55c262fb6d774828c7e9465939472f45acf4571d953cb247e2/praat_parselmouth-0.4.6-cp310-cp310-win_amd64.whl
+conda install -c conda-forge flask numpy pandas scikit-learn joblib librosa scipy resampy audioread soundfile numba sounddevice -y
+pip install --no-cache-dir "praat_parselmouth @ https://files.pythonhosted.org/packages/83/d0/a5383230ed55c262fb6d774828c7e9465939472f45acf4571d953cb247e2/praat_parselmouth-0.4.6-cp310-cp310-win_amd64.whl"
 ```
 
 Then proceed to "Verify core imports" or run the app.

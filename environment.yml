@@ -1,0 +1,20 @@
+name: parkinsons
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - flask
+  - numpy
+  - pandas
+  - scikit-learn
+  - joblib
+  - librosa
+  - scipy
+  - resampy
+  - audioread
+  - soundfile
+  - numba
+  - sounddevice
+  - pip:
+    - praat_parselmouth @ https://files.pythonhosted.org/packages/83/d0/a5383230ed55c262fb6d774828c7e9465939472f45acf4571d953cb247e2/praat_parselmouth-0.4.6-cp310-cp310-win_amd64.whl

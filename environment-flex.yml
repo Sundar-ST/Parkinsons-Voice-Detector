@@ -1,0 +1,22 @@
+name: parkinsons-flex
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.10,<3.12
+  - pip
+  - flask
+  - numpy
+  - pandas
+  - scikit-learn
+  - joblib
+  - librosa
+  - scipy
+  - resampy
+  - audioread
+  - soundfile
+  - numba
+  - sounddevice
+  - pip:
+    # Parselmouth: try to install from PyPI (pip will fetch a wheel if available for your Python ABI)
+    # If pip fails to find a wheel, install manually or use the pinned environment.yml with Python 3.10
+    - praat-parselmouth

@@ -1,26 +1,31 @@
-# Core runtime (pinned exact versions for reproducibility)
-Flask==2.2.5
-numpy==1.24.3
-pandas==1.5.3
-scikit-learn==1.1.3
-joblib==1.2.0
+# Core runtime (flexible ranges for broader compatibility)
+Flask>=2.0,<3
+numpy>=1.22,<2
+pandas>=1.3,<2
+scikit-learn>=1.0,<2
+joblib>=1.1,<2
 
-# Audio / signal processing (pinned)
-librosa==0.9.2
-scipy==1.10.1
-resampy==0.3.1
-audioread==2.1.9
-soundfile==0.12.1
-numba==0.56.4
+# Audio / signal processing (flexible ranges)
+librosa>=0.8,<1
+scipy>=1.6,<2
+resampy>=0.2.2,<1
+audioread>=2.1,<3
+soundfile>=0.12,<1
+numba>=0.53,<1
 
 # Live recording (mvp_core.py uses sounddevice)
-sounddevice==0.4.6
+sounddevice>=0.4,<1
 
-# Parselmouth (fetched directly from PyPI for Python 3.10 on Windows)
-praat_parselmouth @ https://files.pythonhosted.org/packages/83/d0/a5383230ed55c262fb6d774828c7e9465939472f45acf4571d953cb247e2/praat_parselmouth-0.4.6-cp310-cp310-win_amd64.whl
+# Parselmouth: try installing from PyPI (pip will fetch a matching wheel if available)
+# Parselmouth (minimum supported)
+praat-parselmouth>=0.4.6
+
+# Note: Parselmouth distribution is platform- and Python-ABI-specific.
+# If pip cannot find a compatible wheel for your Python, use the conda
+# approach (see README) or install a matching wheel manually (see README).
 
 # Optional (uncomment if needed)
-# matplotlib==3.7.1
-# jupyter==1.0.0
-# pyaudio==0.2.11  # only if you switch to PyAudio-based recording
-# gunicorn==21.2.0  # production server; use instead of Flask dev server for production deployments
+# matplotlib>=3.5,<4
+# jupyter
+# pyaudio  # only if you switch to PyAudio-based recording
+# gunicorn>=20,<22  # production server; use instead of Flask dev server for production deployments
