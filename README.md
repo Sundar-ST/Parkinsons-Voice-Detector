@@ -14,7 +14,8 @@ This project records a short voice sample, extracts features with Praat/Parselmo
 ```powershell
 python -m venv .\parkinsons
 # Activate (PowerShell)
-.\venv\Scripts\Activate.ps1
+# Activate (PowerShell)
+.\parkinsons\Scripts\Activate.ps1
 # Upgrade pip and wheel
 python -m pip install --upgrade pip wheel
 ```
