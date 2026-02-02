@@ -156,7 +156,3 @@ Open http://127.0.0.1:5000/ in your browser and use the web UI to record and run
 - `mvp_core.py` — audio recording, preprocessing, and feature extraction (Parselmouth + Praat calls).
 - `train_model.py` — script to train and save the `parkinsons_model.pkl` and `feature_scaler.pkl`.
 
----
-If you want, I can also:
-- add a small `verify_env.py` script that programmatically runs the import checks and prints helpful messages, or
-- pin different package versions tailored to a newer Python if you plan to upgrade. Which would you prefer next?
